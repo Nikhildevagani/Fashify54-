@@ -1,4 +1,4 @@
-# Fashify54-
+# Fashify54.in
 Anytime Anyone Anywhere 
 
 # 👾 Fashify: AI-Powered Personal Stylist & Wardrobe Assistant
