@@ -1,0 +1,183 @@
+import json
+from tabulate import tabulate
+import random
+import os
+
+# File to store wardrobe data
+DATA_FILE = "wardrobe.json"
+
+# Global lists
+items = []
+combos = []
+
+
+# --- File Handling ---
+def load_data():
+    global items, combos
+    if os.path.exists(DATA_FILE):
+        with open(DATA_FILE, "r") as f:
+            data = json.load(f)
+            items = data.get("items", [])
+            combos = data.get("combos", [])
+
+
+def save_data():
+    with open(DATA_FILE, "w") as f:
+        json.dump({"items": items, "combos": combos}, f, indent=4)
+
+
+# --- Wardrobe Functions ---
+def add_item():
+    print("\n--- Add New Item ---")
+    item_type = input("Type (Shirt/Pant/Shoes...): ").strip()
+    color = input("Color: ").strip()
+    category = input("Category (Casual/Formal/Party/Interview): ").strip()
+    season = input("Season (Summer/Winter/Monsoon/All): ").strip()
+
+    item = {
+        "type": item_type,
+        "color": color,
+        "category": category,
+        "season": season
+    }
+    items.append(item)
+    save_data()
+    print("✅ Item added successfully!")
+
+
+def view_items():
+    print("\n--- Your Wardrobe Items ---")
+    if not items:
+        print("⚠ No items found! Please add something first.")
+        return
+
+    table = []
+    headers = ["ID", "Type", "Color", "Category", "Season"]
+
+    for idx, item in enumerate(items, start=1):
+        table.append([idx, item['type'], item['color'], item['category'], item['season']])
+
+    print(tabulate(table, headers=headers, tablefmt="grid"))
+
+
+def delete_item():
+    view_items()
+    if not items:
+        return
+    try:
+        choice = int(input("Enter Item ID to delete: "))
+        if 1 <= choice <= len(items):
+            removed = items.pop(choice - 1)
+            save_data()
+            print(f"🗑 Deleted item: {removed['type']} ({removed['color']})")
+        else:
+            print("⚠ Invalid ID.")
+    except ValueError:
+        print("⚠ Please enter a valid number.")
+
+
+def create_combo():
+    view_items()
+    if not items:
+        return
+    try:
+        ids = input("Enter item IDs for combo (comma separated): ").split(",")
+        combo = []
+        for i in ids:
+            idx = int(i.strip()) - 1
+            if 0 <= idx < len(items):
+                combo.append(items[idx])
+        if combo:
+            combos.append(combo)
+            save_data()
+            print("✅ Combo created successfully!")
+        else:
+            print("⚠ No valid items selected.")
+    except ValueError:
+        print("⚠ Invalid input.")
+
+
+def view_combos():
+    print("\n--- Your Outfit Combos ---")
+    if not combos:
+        print("⚠ No combos created yet.")
+        return
+
+    for idx, combo in enumerate(combos, start=1):
+        print(f"\nCombo {idx}:")
+        table = []
+        headers = ["Type", "Color", "Category", "Season"]
+        for item in combo:
+            table.append([item['type'], item['color'], item['category'], item['season']])
+        print(tabulate(table, headers=headers, tablefmt="grid"))
+
+
+def delete_combo():
+    view_combos()
+    if not combos:
+        return
+    try:
+        choice = int(input("Enter Combo ID to delete: "))
+        if 1 <= choice <= len(combos):
+            combos.pop(choice - 1)
+            save_data()
+            print("🗑 Combo deleted successfully!")
+        else:
+            print("⚠ Invalid ID.")
+    except ValueError:
+        print("⚠ Please enter a valid number.")
+
+
+def random_outfit():
+    print("\n--- Random Outfit Suggestion ---")
+    if not items:
+        print("⚠ No items available to suggest.")
+        return
+    outfit = random.sample(items, min(3, len(items)))
+    table = []
+    headers = ["Type", "Color", "Category", "Season"]
+    for item in outfit:
+        table.append([item['type'], item['color'], item['category'], item['season']])
+    print(tabulate(table, headers=headers, tablefmt="grid"))
+
+
+# --- Menu ---
+def menu():
+    load_data()  # Load saved data on startup
+
+    while True:
+        print("\n=== Fashify54 ===")
+        print("1. Add Item")
+        print("2. View Items")
+        print("3. Delete Item")
+        print("4. Create Combo")
+        print("5. View Combos")
+        print("6. Delete Combo")
+        print("7. Random Outfit Suggestion")
+        print("8. Exit")
+
+        choice = input("Choose an option: ")
+
+        if choice == "1":
+            add_item()
+        elif choice == "2":
+            view_items()
+        elif choice == "3":
+            delete_item()
+        elif choice == "4":
+            create_combo()
+        elif choice == "5":
+            view_combos()
+        elif choice == "6":
+            delete_combo()
+        elif choice == "7":
+            random_outfit()
+        elif choice == "8":
+            print("👋 Exiting... Goodbye!")
+            break
+        else:
+            print("⚠ Invalid option. Try again.")
+
+
+if __name__ == "__main__":
+    menu()
